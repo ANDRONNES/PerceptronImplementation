@@ -32,7 +32,7 @@ public class Perceptron {
         for (int i = 0; i < weights.length; i++) {
             weights[i] += (rightDecision - decision) * inputs[i] /* * alpha*/;
         }
-        threshould += (rightDecision - decision) * alpha;
+//        threshould += (rightDecision - decision) * alpha;
     }
 
     public float[] randomArray() {

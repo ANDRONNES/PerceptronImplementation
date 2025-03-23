@@ -3,30 +3,66 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
     static List<Flower> trainingData = new ArrayList<>();
+    static List<Flower> testingData = new ArrayList<>();
     static List<float[]> inputs = new ArrayList<>();
     static List<Integer> rightOutputs = new ArrayList<>();
 
     public static void main(String[] args) {
-        List<Integer> outputs = new ArrayList<>();
         Perceptron p = new Perceptron();
+        Scanner scanner = new Scanner(System.in);
         trainingData = loadTrainingData("..\\Perceptron\\iris_test.txt");
+        testingData = loadTestingDataWitoutAnswers("..\\Perceptron\\iris_test.txt");
+
         for (int i = 0; i < trainingData.size(); i++) {
             inputs.add(trainingData.get(i).getParameters());
-        }
-        for (int i = 0; i < trainingData.size(); i++) {
             if (trainingData.get(i).getFlowerName().equals("Iris-setosa")) rightOutputs.add(1);
             else rightOutputs.add(0);
         }
 
-        System.out.println(rightOutputs);
+        trainPerceptron(p, 1);
+//        testPerceptron(p,inputs,rightOutputs);
+        //resetujemy wszystko
+        inputs.clear();
+        rightOutputs.clear();
+        for (int i = 0; i < testingData.size(); i++) {
+            inputs.add(testingData.get(i).getParameters());
+            if (trainingData.get(i).getFlowerName().equals("Iris-setosa")) rightOutputs.add(1);
+            else rightOutputs.add(0);
+        }
+        testPerceptron(p, inputs, rightOutputs);
 
-        trainPerceptron(p,4);
-        testPerceptron(p,inputs,rightOutputs);
+        System.out.println("Now you can enter yours flower to check the type of this flower" +
+                "\n" + "Enter parameters(sizes) into console one-by-one" + "\n" +
+                "Do you want to continue? type \"yes\" or \"no\"");
+        while (!scanner.nextLine().equals("!")) {
+            float[] newVec = new float[4];
+            String s1 = scanner.nextLine();
+            if (s1.equals("no")) break;
+            else {
+                System.out.println("Start entering the parameters");
+                for (int i = 0; i < newVec.length; i++) {
+                    newVec[i] = scanner.nextFloat();
+                }
+                testPerceptronOnOneFlower(p, newVec);
+//                Flower f = new Flower(newVec);
+//                classifyOneFlower(f, k, trainingDataBase);
+//                System.out.println("Yours iris type is " + f.getFlowerName());
+                System.out.println("Do you want to continue? type \"yes\" or \"no\"");
+            }
+        }
+
 
     }
+
+    public static void testPerceptronOnOneFlower(Perceptron p, float[] input){
+        if(p.compute(input) == 1) System.out.println("Your flower is Iris-Setosa");
+        else System.out.println("Your flower is NOT Iris-Setosa");
+    }
+
     public static void testPerceptron(Perceptron perceptron, List<float[]> testData, List<Integer> testLabels) {
         int correctCount = 0;
         for (int i = 0; i < testData.size(); i++) {
@@ -36,15 +72,16 @@ public class Main {
             }
         }
         double accuracy = (double) correctCount / testData.size() * 100;
-        System.out.println("Liczba poprawnie zaklasyfikowanych przykładów: " + correctCount);
-        System.out.println("Dokładność: " + accuracy + "%");
+        System.out.println("Number of correct ANSWERS: " + correctCount);
+        System.out.println("The percent of experiment accuracy: " + accuracy + "%");
+
     }
 
 
-    public static void trainPerceptron(Perceptron p, int epoka){
+    public static void trainPerceptron(Perceptron p, int epoka) {
         for (int i = 0; i < epoka; i++) {
             for (int j = 0; j < inputs.size(); j++) {
-                p.learn(p.compute(inputs.get(j)),rightOutputs.get(j));
+                p.learn(p.compute(inputs.get(j)), rightOutputs.get(j));
             }
         }
     }
